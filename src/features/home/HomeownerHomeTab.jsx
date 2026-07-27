@@ -13,7 +13,10 @@ import {
   IdentificationBadge,
   MapPinSimpleArea,
   PaperPlaneTilt,
+  PencilSimpleLine,
   PhoneCall,
+  Play,
+  Plus,
   Prohibit,
   SealCheck,
   Sparkle,
@@ -65,7 +68,7 @@ const categoryProfessionalImages = Array.from({ length: 15 }, (_, index) => (
   `/hynt-home/category-professionals/portfolio-${index + 1}.jpeg`
 ))
 
-const categoryProfessionals = [
+export const categoryProfessionals = [
   {
     id: 'rohan-mehta',
     name: 'Rohan Mehta',
@@ -243,12 +246,12 @@ function ProfessionalListRow({ professional, onOpen }) {
   )
 }
 
-function ProfileSectionHeader({ title, count, action }) {
+function ProfileSectionHeader({ title, count, action, onAction }) {
   return (
     <div className="flex h-10 items-center justify-between px-4 py-2">
       <h2 className="typo-title-16-strong capitalize text-[#101828]">{title}</h2>
       {count || action ? (
-        <button type="button" className="typo-meta typo-weight-semibold flex items-center gap-2 text-[#101828]">
+        <button type="button" onClick={onAction} className="typo-meta typo-weight-semibold flex items-center gap-2 text-[#101828]">
           {count || action}
           <ArrowRight size={16} />
         </button>
@@ -347,12 +350,157 @@ function ProfileHero({ professional }) {
   )
 }
 
-function ProfileAlbums({ professional }) {
-  const albumImages = [...professional.images, ...categoryProfessionalImages].slice(0, 7)
+function getProfileWorkItems(professional) {
+  return [...professional.images, ...categoryProfessionalImages].slice(0, 12).map((image, index) => ({
+    id: `work-${index}`,
+    image,
+    isVideo: [1, 6, 9].includes(index),
+    height: [178, 148, 92, 252, 194, 140, 212, 156, 236, 164, 204, 132][index] || 172,
+  }))
+}
+
+function WorkTopbar({ title, onBack }) {
+  return (
+    <div className="border-b border-black/[0.04] bg-white">
+      <header className="flex h-[57px] items-center justify-between px-4 py-2">
+        <button type="button" onClick={onBack} aria-label={`Back from ${title}`} className="grid size-10 place-items-center rounded-full text-black">
+          <CaretLeft size={24} />
+        </button>
+        <h1 className="typo-section-title min-w-0 flex-1 truncate px-2 text-black">{title}</h1>
+        <button type="button" aria-label={`Add ${title} item`} className="grid size-10 place-items-center rounded-full text-black">
+          <Plus size={24} />
+        </button>
+      </header>
+    </div>
+  )
+}
+
+function WorkTabs({ selectedTab, onSelectTab }) {
+  const tabs = [
+    ['all', 'All'],
+    ['collections', 'Collections'],
+    ['products', 'Products'],
+    ['catalogue', 'Catalogue'],
+  ]
+
+  return (
+    <div className="no-scrollbar flex gap-2 overflow-x-auto px-4 py-3">
+      {tabs.map(([key, label]) => {
+        const selected = selectedTab === key
+        return (
+          <button
+            key={key}
+            type="button"
+            onClick={() => onSelectTab(key)}
+            className={`typo-meta shrink-0 rounded-full border px-4 py-2 ${selected ? 'border-[#26c485] bg-[#26c485] text-white' : 'border-[#e0e0e0] bg-white text-black'}`}
+          >
+            {label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+function WorkImageTile({ item, title }) {
+  return (
+    <button type="button" className="relative mb-3 w-full break-inside-avoid overflow-hidden rounded-[14px] bg-[#f2f2f2]" style={{ height: item.height }}>
+      <img src={item.image} alt="" className="absolute inset-0 size-full object-cover" loading="lazy" />
+      {item.isVideo ? (
+        <span className="absolute right-2 top-2 grid size-8 place-items-center rounded-full bg-black/35 text-white backdrop-blur">
+          <Play size={14} weight="fill" />
+        </span>
+      ) : null}
+      <span className="absolute bottom-2 right-2 grid size-8 place-items-center rounded-lg bg-white text-black shadow-[0_4px_12px_rgba(0,0,0,0.12)]">
+        <BookmarkSimple size={16} />
+      </span>
+      {title ? (
+        <span className="typo-meta absolute inset-x-0 bottom-0 block truncate bg-gradient-to-t from-black/55 to-transparent px-3 pb-3 pt-8 text-left text-white">
+          {title}
+        </span>
+      ) : null}
+    </button>
+  )
+}
+
+function WorkAllGrid({ professional }) {
+  return (
+    <div className="columns-2 gap-3 px-4 pb-6">
+      {getProfileWorkItems(professional).map((item) => (
+        <WorkImageTile key={item.id} item={item} />
+      ))}
+    </div>
+  )
+}
+
+function WorkCollectionsGrid({ professional }) {
+  const collectionTitles = ['Bandra Luxe 3BHK', 'Bandra Modern Haven', 'Urban Retreat 3BHK', 'Warm Minimal Home', 'Powai Family Home', 'Compact Studio']
+  const items = getProfileWorkItems(professional).slice(0, 6)
+
+  return (
+    <div className="grid grid-cols-2 gap-x-3 gap-y-5 px-4 pb-6">
+      {items.map((item, index) => (
+        <article key={item.id} className="min-w-0">
+          <WorkImageTile item={{ ...item, height: index % 2 === 0 ? 178 : 148 }} />
+          <h2 className="typo-meta typo-weight-semibold -mt-1 truncate text-black">{collectionTitles[index]}</h2>
+        </article>
+      ))}
+    </div>
+  )
+}
+
+function WorkProductsGrid() {
+  return (
+    <div className="grid grid-cols-2 gap-3 px-4 pb-6">
+      {profileProducts.concat(profileProducts).map((product, index) => (
+        <article key={`${product.id}-${index}`} className="min-w-0 overflow-hidden rounded-[14px] bg-white">
+          <div className="relative h-[150px] overflow-hidden rounded-[14px] bg-[#f2f2f2]">
+            <img src={product.image} alt="" className="absolute inset-0 size-full object-cover" loading="lazy" />
+            <span className="typo-meta absolute right-2 top-2 rounded-full bg-white px-2 py-1 text-black">1/5</span>
+            <button type="button" aria-label={`Save ${product.title}`} className="absolute bottom-2 right-2 grid size-8 place-items-center rounded-lg bg-white text-black shadow-[0_4px_12px_rgba(0,0,0,0.12)]">
+              <BookmarkSimple size={16} />
+            </button>
+          </div>
+          <div className="pt-2">
+            <h2 className="typo-meta typo-weight-semibold line-clamp-2 text-black">{product.title}</h2>
+            <p className="typo-caption mt-1 truncate text-[#7a7a7a]">{product.category}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+  )
+}
+
+function ProfileWorkPage({ professional, initialTab = 'all', onBack }) {
+  const [selectedTab, setSelectedTab] = useState(initialTab)
+
+  useLayoutEffect(() => {
+    if (typeof window === 'undefined') return
+    window.scrollTo({ top: 0, left: 0 })
+  }, [initialTab])
+
+  return (
+    <section className="hynt-home-mobile-canvas relative mx-auto min-h-dvh w-full max-w-[390px] overflow-visible bg-white">
+      <div className="fixed left-1/2 top-0 z-50 w-full max-w-[390px] -translate-x-1/2 bg-white pt-[env(safe-area-inset-top)]">
+        <WorkTopbar title="Work" onBack={onBack} />
+        <WorkTabs selectedTab={selectedTab} onSelectTab={setSelectedTab} />
+      </div>
+      <div className="pt-[calc(117px+env(safe-area-inset-top))]">
+        {selectedTab === 'all' ? <WorkAllGrid professional={professional} /> : null}
+        {selectedTab === 'collections' ? <WorkCollectionsGrid professional={professional} /> : null}
+        {selectedTab === 'products' ? <WorkProductsGrid /> : null}
+        {selectedTab === 'catalogue' ? <WorkProductsGrid /> : null}
+      </div>
+    </section>
+  )
+}
+
+function ProfileAlbums({ professional, onOpenWork }) {
+  const albumImages = getProfileWorkItems(professional).map((item) => item.image).slice(0, 7)
 
   return (
     <section className="border-t border-[#e0e0e0] py-3">
-      <ProfileSectionHeader title="Albums" count="32" />
+      <ProfileSectionHeader title="Albums" count="32" onAction={() => onOpenWork?.('all')} />
       <div className="grid h-[184px] grid-cols-4 grid-rows-2 gap-1 px-4">
         <button type="button" className="col-span-2 overflow-hidden rounded-[12px] bg-[#f2f2f2]">
           <img src={albumImages[0]} alt="" className="size-full object-cover" />
@@ -377,10 +525,10 @@ function ProfileAlbums({ professional }) {
   )
 }
 
-function ProfileProducts() {
+function ProfileProducts({ onOpenWork }) {
   return (
     <section className="border-t border-[#e0e0e0] py-3">
-      <ProfileSectionHeader title="Products" count="32" />
+      <ProfileSectionHeader title="Products" count="32" onAction={() => onOpenWork?.('products')} />
       <div className="no-scrollbar flex gap-3 overflow-x-auto px-4 pb-1">
         {profileProducts.map((product) => (
           <article key={product.id} className="w-[171px] shrink-0 overflow-hidden rounded-[14px] border border-[#e0e0e0] bg-white">
@@ -559,7 +707,7 @@ function ProfileBottomCta({ professional }) {
   )
 }
 
-function ProfileActionsSheet({ professional, onClose }) {
+function ProfileActionsSheet({ professional, onClose, canEditProfile = false }) {
   return (
     <div className="fixed inset-x-0 bottom-0 z-[70] mx-auto w-full max-w-[390px] bg-black/20">
       <div className="flex justify-center pb-2">
@@ -597,6 +745,12 @@ function ProfileActionsSheet({ professional, onClose }) {
           <X size={24} />
         </button>
         <div className="mt-4 overflow-hidden rounded-2xl">
+          {canEditProfile ? (
+            <button type="button" className="flex h-10 w-full items-center gap-2 px-2 text-left">
+              <PencilSimpleLine size={20} />
+              <span className="typo-meta text-black">Edit profile</span>
+            </button>
+          ) : null}
           <button type="button" className="flex h-10 w-full items-center gap-2 px-2 text-left">
             <Export size={20} />
             <span className="typo-meta text-black">Share</span>
@@ -616,22 +770,40 @@ function ProfileActionsSheet({ professional, onClose }) {
   )
 }
 
-function ProfessionalProfilePage({ professional, onBack }) {
+export function ProfessionalProfilePage({ professional, onBack, audience = 'homeowner' }) {
   const [isActionsOpen, setIsActionsOpen] = useState(false)
+  const [workInitialTab, setWorkInitialTab] = useState(null)
+  const isProfessionalOwner = audience === 'professional'
+
+  if (workInitialTab) {
+    return (
+      <ProfileWorkPage
+        professional={professional}
+        initialTab={workInitialTab}
+        onBack={() => setWorkInitialTab(null)}
+      />
+    )
+  }
 
   return (
-    <section className="hynt-home-mobile-canvas relative mx-auto min-h-dvh w-full max-w-[390px] overflow-visible bg-white pb-[112px]">
+    <section className={`hynt-home-mobile-canvas relative mx-auto min-h-dvh w-full max-w-[390px] overflow-visible bg-white ${isProfessionalOwner ? 'pb-6' : 'pb-[112px]'}`}>
       <ProfileTopChrome professional={professional} onBack={onBack} onMenu={() => setIsActionsOpen(true)} />
       <ProfileHero professional={professional} />
-      <ProfileAlbums professional={professional} />
-      <ProfileProducts />
+      <ProfileAlbums professional={professional} onOpenWork={setWorkInitialTab} />
+      <ProfileProducts onOpenWork={setWorkInitialTab} />
       <ProfileAbout professional={professional} />
       <ProfileServices professional={professional} />
       <ProfileReviews professional={professional} />
       <ProfileCredentials />
       <ProfileEvents />
-      <ProfileBottomCta professional={professional} />
-      {isActionsOpen ? <ProfileActionsSheet professional={professional} onClose={() => setIsActionsOpen(false)} /> : null}
+      {isProfessionalOwner ? null : <ProfileBottomCta professional={professional} />}
+      {isActionsOpen ? (
+        <ProfileActionsSheet
+          professional={professional}
+          canEditProfile={isProfessionalOwner}
+          onClose={() => setIsActionsOpen(false)}
+        />
+      ) : null}
     </section>
   )
 }

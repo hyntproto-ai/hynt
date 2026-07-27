@@ -53,7 +53,7 @@ import HomeownerFinanceWorkspace from './features/finance/HomeownerFinanceWorksp
 import HomeownerBoqWorkspace from './features/homeowner/HomeownerBoqWorkspace'
 import HomeownerTimelineWorkspace from './features/timeline/HomeownerTimelineWorkspace'
 import HomeownerSiteDiaryWorkspace from './features/homeowner/HomeownerSiteDiaryWorkspace'
-import HomeownerHomeTab from './features/home/HomeownerHomeTab'
+import HomeownerHomeTab, { ProfessionalProfilePage, categoryProfessionals } from './features/home/HomeownerHomeTab'
 import HomeBlogsPage from './features/home/HomeBlogsPage'
 import ProfessionalHomeTab from './features/home/ProfessionalHomeTab'
 import HomeSearchBar from './features/home/HomeSearchBar'
@@ -702,6 +702,8 @@ function ProfessionalHome({ onOpenFlowSwitcher }) {
         body: 'Create a project to start tracking scope, timelines, and homeowner collaboration.',
       }
   const selectedProject = projects.find((project) => project.id === selectedProjectId) || null
+  const professionalProfile = categoryProfessionals[0]
+  const isProfessionalProfileOpen = proHomeTab === 'professional-profile'
   const getProjectCount = (status) => projects.filter((project) => (
     status === 'Completed'
       ? ['Completed', 'Done'].includes(project.status)
@@ -860,7 +862,7 @@ function ProfessionalHome({ onOpenFlowSwitcher }) {
       <div className="hynt-home-shell__sidebar-rail">
         <div className="flex flex-col items-center gap-4">
           <button type="button" aria-label="Open profile switcher" onClick={onOpenFlowSwitcher} className="hynt-home-shell__utility-button">
-            <img src="/hynt-home/pro-1.png" alt="" className="size-7 rounded-full object-cover" />
+            <img src={professionalProfile.avatar} alt="" className="size-7 rounded-full object-cover" />
           </button>
           <button type="button" aria-label="Notifications" className="hynt-home-shell__utility-button relative">
             <Bell size={20} />
@@ -1628,7 +1630,7 @@ function ProfessionalHome({ onOpenFlowSwitcher }) {
       <div className="hynt-home-shell__layout">
         {renderProDesktopNav()}
         <div className="hynt-home-shell__main">
-      <section className="hynt-pro-home-canvas mx-auto w-full max-w-[390px] overflow-visible pb-[108px]">
+      <section className={`hynt-pro-home-canvas mx-auto w-full max-w-[390px] overflow-visible ${isProfessionalProfileOpen ? 'pb-0' : 'pb-[108px]'}`}>
         {proHomeTab === 'home' ? (
           <>
             <div
@@ -1637,7 +1639,14 @@ function ProfessionalHome({ onOpenFlowSwitcher }) {
             >
               <header className="pb-3">
                 <div className="hynt-topbar-primary flex items-center justify-between px-4 py-2">
-                  <img src="/hynt-home/pro-1.png" alt="Profile" className="size-10 shrink-0 rounded-full border border-white/45 object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => setProHomeTab('professional-profile')}
+                    aria-label="Open profile"
+                    className="size-10 shrink-0 overflow-hidden rounded-full border border-white/45"
+                  >
+                    <img src={professionalProfile.avatar} alt="" className="size-full object-cover" />
+                  </button>
                   <div className="flex shrink-0 items-center gap-0.5">
                     <button type="button" aria-label="Notifications" onClick={onOpenFlowSwitcher} className="relative grid size-[37px] place-items-center rounded-[10px] text-white">
                       <Bell size={24} />
@@ -1686,11 +1695,19 @@ function ProfessionalHome({ onOpenFlowSwitcher }) {
               setIsProjectsViewOpen(true)
               setProHomeTab('home')
             }}
-            onOpenPortfolio={() => setProHomeTab('explore')}
+            onOpenPortfolio={() => setProHomeTab('professional-profile')}
           />
         ) : null}
 
         {proHomeTab === 'explore' ? <ExplorePage /> : null}
+
+        {isProfessionalProfileOpen ? (
+          <ProfessionalProfilePage
+            professional={professionalProfile}
+            audience="professional"
+            onBack={() => setProHomeTab('home')}
+          />
+        ) : null}
 
         {proHomeTab === 'ai' ? (
           <>
@@ -1738,6 +1755,7 @@ function ProfessionalHome({ onOpenFlowSwitcher }) {
         ) : null}
       </section>
 
+      {isProfessionalProfileOpen ? null : (
       <nav className="hynt-home-shell__nav fixed bottom-0 left-1/2 z-30 flex h-[92px] w-full max-w-[390px] -translate-x-1/2 items-start justify-between border-t border-[#e6e6e6] bg-white/95 px-3 pb-5 pt-3 backdrop-blur">
         {proSidebarItems.map(([key, label, Icon, kind]) => (
           <button
@@ -1759,6 +1777,7 @@ function ProfessionalHome({ onOpenFlowSwitcher }) {
           </button>
         ))}
       </nav>
+      )}
         </div>
       </div>
     </main>
