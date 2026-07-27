@@ -95,13 +95,14 @@ function CategoryIcon({ src }) {
   return <img src={src} alt="" className="size-6 object-contain" />
 }
 
-function CategoryCard({ category, index, className = 'min-h-[132px]' }) {
+function CategoryCard({ category, index, className = 'min-h-[132px]', onSelect }) {
   const { label, description, icon, id } = category
 
   return (
     <button
       key={id || `${label}-${index}`}
       type="button"
+      onClick={() => onSelect?.(category)}
       aria-label={label}
       className={`${className} rounded-[20px] border border-black/[0.04] bg-[#fbfbfb] px-3 pb-4 pt-3 text-left shadow-[4px_8px_12px_-9px_rgba(95,193,138,0.12)]`}
     >
@@ -114,7 +115,7 @@ function CategoryCard({ category, index, className = 'min-h-[132px]' }) {
   )
 }
 
-function HomeExploreCategoriesGrid({ title = 'Categories', layout = 'cards', onViewAll }) {
+function HomeExploreCategoriesGrid({ title = 'Categories', layout = 'cards', onViewAll, onCategorySelect }) {
   if (layout === 'icons') {
     return (
       <section className="px-4 py-5">
@@ -130,6 +131,7 @@ function HomeExploreCategoriesGrid({ title = 'Categories', layout = 'cards', onV
               key={label}
               type="button"
               aria-label={label}
+              onClick={() => onCategorySelect?.({ label })}
               className="flex min-w-0 flex-col items-center text-center"
             >
               <span className={`grid size-16 place-items-center rounded-full border border-white shadow-[0_8px_22px_rgba(22,44,32,0.08)] ${tone}`}>
@@ -148,7 +150,13 @@ function HomeExploreCategoriesGrid({ title = 'Categories', layout = 'cards', onV
       <section className="px-3 pb-8 pt-0">
         <div className="grid grid-cols-3 gap-3">
           {allExploreCategories.map((category, index) => (
-            <CategoryCard key={category.id || `${category.label}-${index}`} category={category} index={index} className="h-[150px]" />
+            <CategoryCard
+              key={category.id || `${category.label}-${index}`}
+              category={category}
+              index={index}
+              className="h-[150px]"
+              onSelect={onCategorySelect}
+            />
           ))}
         </div>
       </section>
@@ -183,7 +191,7 @@ function HomeExploreCategoriesGrid({ title = 'Categories', layout = 'cards', onV
         </button>
 
         {exploreCategories.map((category, index) => (
-          <CategoryCard key={`${category.label}-${index}`} category={category} index={index} />
+          <CategoryCard key={`${category.label}-${index}`} category={category} index={index} onSelect={onCategorySelect} />
         ))}
       </div>
     </section>
