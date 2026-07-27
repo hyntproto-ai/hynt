@@ -1773,6 +1773,7 @@ function HomeownerFlow({ activeFlow, onSelectFlow }) {
   const [exploreIdeaFeed, setExploreIdeaFeed] = useState(fallbackDesktopExploreIdeaCards)
   const [isExploreSearchOpen, setIsExploreSearchOpen] = useState(false)
   const [isExploreNested, setIsExploreNested] = useState(false)
+  const [isHomeNested, setIsHomeNested] = useState(false)
   const [isHomeDockDense, setIsHomeDockDense] = useState(false)
   const [chatDraft, setChatDraft] = useState('')
   const [isChatOpen, setIsChatOpen] = useState(false)
@@ -2003,6 +2004,10 @@ function HomeownerFlow({ activeFlow, onSelectFlow }) {
 
   useEffect(() => {
     if (homeTab !== 'explore') setIsExploreNested(false)
+  }, [homeTab])
+
+  useEffect(() => {
+    if (homeTab !== 'home') setIsHomeNested(false)
   }, [homeTab])
 
   useEffect(() => {
@@ -2796,7 +2801,7 @@ function HomeownerFlow({ activeFlow, onSelectFlow }) {
     if (isHomeownerSiteDiaryOpen) return <HomeownerSiteDiaryWorkspace onBack={() => setIsHomeownerSiteDiaryOpen(false)} />
     if (homeTab === 'blogs') return <HomeBlogsPage onBack={() => setHomeTab('home')} />
 
-    const shouldHideHomeNav = homeTab === 'explore' && isExploreNested
+    const shouldHideHomeNav = (homeTab === 'explore' && isExploreNested) || (homeTab === 'home' && isHomeNested)
 
     return (
     <main className={`hynt-home hynt-home-shell min-h-dvh w-full bg-[#eef3f0] font-['Urbanist'] text-black ${shouldHideHomeNav ? '' : 'pb-[92px]'}`}>
@@ -2808,6 +2813,7 @@ function HomeownerFlow({ activeFlow, onSelectFlow }) {
               isHomeDockDense={isHomeDockDense}
               setIsFlowSwitcherOpen={setIsFlowSwitcherOpen}
               homepageEvents={homepageEvents}
+              onDepthChange={setIsHomeNested}
               prompt={prompt}
               setPrompt={setPrompt}
               openChatFromHome={openChatFromHome}

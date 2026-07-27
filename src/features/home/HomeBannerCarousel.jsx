@@ -28,7 +28,7 @@ const bannerSets = {
   ],
 }
 
-function HomeBannerCarousel({ audience = 'homeowner' }) {
+function HomeBannerCarousel({ audience = 'homeowner', showPagination = false }) {
   const banners = bannerSets[audience] || bannerSets.homeowner
 
   return (
@@ -65,6 +65,13 @@ function HomeBannerCarousel({ audience = 'homeowner' }) {
           )
         ))}
       </div>
+      {showPagination ? (
+        <div className="mt-2 flex justify-center gap-1">
+          <span className="size-1 rounded-full bg-black/12" />
+          <span className="size-1 rounded-full bg-black/12" />
+          <span className="h-1 w-6 rounded-full bg-black/12" />
+        </div>
+      ) : null}
     </section>
   )
 }

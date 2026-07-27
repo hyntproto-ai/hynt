@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef, useState } from 'react'
 import {
   ArrowRight,
   CalendarDots,
+  CaretLeft,
   MapPinSimpleArea,
 } from '@phosphor-icons/react'
 import HomeBannerCarousel from './HomeBannerCarousel'
@@ -22,15 +23,47 @@ function HomeBrandWatermark() {
   )
 }
 
+function HomeNestedTopbar({ title, onBack }) {
+  return (
+    <div className="sticky top-0 z-50 border-b border-black/[0.08] bg-[linear-gradient(180deg,#fff_0%,rgba(255,255,255,0.92)_100%)] pb-2 pt-[env(safe-area-inset-top)] backdrop-blur-[12px]">
+      <header className="px-4 py-3">
+        <div className="flex h-8 items-center justify-between gap-3">
+          <button type="button" onClick={onBack} className="flex min-w-0 items-center gap-4 text-left">
+            <span className="grid size-6 shrink-0 place-items-center rounded">
+              <CaretLeft size={24} />
+            </span>
+            <span className="min-w-0">
+              <span className="typo-section-title block truncate text-black">{title}</span>
+            </span>
+          </button>
+          <span className="size-10 shrink-0 opacity-0" aria-hidden="true" />
+        </div>
+      </header>
+    </div>
+  )
+}
+
+function AllCategoriesPage({ onBack }) {
+  return (
+    <section className="hynt-home-mobile-canvas relative mx-auto min-h-dvh w-full max-w-[390px] overflow-visible bg-white">
+      <HomeNestedTopbar title="All categories" onBack={onBack} />
+      <HomeBannerCarousel audience="homeowner" showPagination />
+      <HomeExploreCategoriesGrid layout="all" />
+    </section>
+  )
+}
+
 function HomeownerHomeTab({
   isHomeDockDense,
   setIsFlowSwitcherOpen,
   homepageEvents,
   onOpenBlogs,
+  onDepthChange,
 }) {
   const eventsRailRef = useRef(null)
   const topDockRef = useRef(null)
   const [topDockSpacerHeight, setTopDockSpacerHeight] = useState(0)
+  const [view, setView] = useState('home')
 
   useLayoutEffect(() => {
     if (!eventsRailRef.current) return
@@ -56,6 +89,14 @@ function HomeownerHomeTab({
     }
   }, [isHomeDockDense])
 
+  useLayoutEffect(() => {
+    onDepthChange?.(view !== 'home')
+  }, [onDepthChange, view])
+
+  if (view === 'all-categories') {
+    return <AllCategoriesPage onBack={() => setView('home')} />
+  }
+
   return (
     <section className="hynt-home-mobile-canvas relative mx-auto w-full max-w-[390px] overflow-visible bg-white">
       <div ref={topDockRef} className={`hynt-home-topdock hynt-home-topdock--fixed hynt-home-topdock--safe hynt-home-green-dock ${isHomeDockDense ? 'hynt-home-topdock--dense hynt-home-green-dock--collapsed' : ''}`}>
@@ -78,7 +119,7 @@ function HomeownerHomeTab({
       <div className="transition-[height] duration-300 ease-out" style={{ height: topDockSpacerHeight }} aria-hidden="true" />
 
       <div className="pb-4">
-        <HomeExploreCategoriesGrid />
+        <HomeExploreCategoriesGrid onViewAll={() => setView('all-categories')} />
 
         <HomeDivider thick />
 

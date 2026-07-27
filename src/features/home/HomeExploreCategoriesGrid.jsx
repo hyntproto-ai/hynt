@@ -81,17 +81,46 @@ const exploreCategories = [
   },
 ]
 
+const allExploreCategories = [
+  ...exploreCategories,
+  ...Array.from({ length: 10 }, (_, index) => ({
+    label: 'Interior Designers',
+    description: 'Design your dream space',
+    icon: '/hynt-home/homepagerev/interior-design.svg',
+    id: `interior-designers-extra-${index}`,
+  })),
+]
+
 function CategoryIcon({ src }) {
   return <img src={src} alt="" className="size-6 object-contain" />
 }
 
-function HomeExploreCategoriesGrid({ title = 'Categories', layout = 'cards' }) {
+function CategoryCard({ category, index, className = 'min-h-[132px]' }) {
+  const { label, description, icon, id } = category
+
+  return (
+    <button
+      key={id || `${label}-${index}`}
+      type="button"
+      aria-label={label}
+      className={`${className} rounded-[20px] border border-black/[0.04] bg-[#fbfbfb] px-3 pb-4 pt-3 text-left shadow-[4px_8px_12px_-9px_rgba(95,193,138,0.12)]`}
+    >
+      <span className="grid size-10 place-items-center rounded-[12px] bg-black/[0.08] text-black">
+        <CategoryIcon src={icon} />
+      </span>
+      <span className="typo-body-12 mt-2 block text-balance text-black">{label}</span>
+      <span className="typo-caption mt-1 block text-balance text-black/64">{description}</span>
+    </button>
+  )
+}
+
+function HomeExploreCategoriesGrid({ title = 'Categories', layout = 'cards', onViewAll }) {
   if (layout === 'icons') {
     return (
       <section className="px-4 py-5">
         <div className="flex items-center justify-between">
           <h2 className="typo-section-title">{title}</h2>
-          <button type="button" className="typo-utility flex items-center gap-1">
+          <button type="button" onClick={onViewAll} className="typo-utility flex items-center gap-1">
             View all <ArrowRight size={16} />
           </button>
         </div>
@@ -114,11 +143,23 @@ function HomeExploreCategoriesGrid({ title = 'Categories', layout = 'cards' }) {
     )
   }
 
+  if (layout === 'all') {
+    return (
+      <section className="px-3 pb-8 pt-0">
+        <div className="grid grid-cols-3 gap-3">
+          {allExploreCategories.map((category, index) => (
+            <CategoryCard key={category.id || `${category.label}-${index}`} category={category} index={index} className="h-[150px]" />
+          ))}
+        </div>
+      </section>
+    )
+  }
+
   return (
     <section className="px-3 py-4">
       <div className="flex items-center justify-between px-1">
         <h2 className="typo-section-title">{title}</h2>
-        <button type="button" className="typo-utility flex items-center gap-1">
+        <button type="button" onClick={onViewAll} className="typo-utility flex items-center gap-1">
           View all <ArrowRight size={16} />
         </button>
       </div>
@@ -141,19 +182,8 @@ function HomeExploreCategoriesGrid({ title = 'Categories', layout = 'cards' }) {
           />
         </button>
 
-        {exploreCategories.map(({ label, description, icon }, index) => (
-          <button
-            key={`${label}-${index}`}
-            type="button"
-            aria-label={label}
-            className="min-h-[132px] rounded-[20px] border border-black/[0.04] bg-[#fbfbfb] px-3 pb-4 pt-3 text-left shadow-[4px_8px_12px_-9px_rgba(95,193,138,0.12)]"
-          >
-            <span className="grid size-10 place-items-center rounded-[12px] bg-black/[0.08] text-black">
-              <CategoryIcon src={icon} />
-            </span>
-            <span className="typo-body-12 mt-2 block text-balance text-black">{label}</span>
-            <span className="typo-caption mt-1 block text-balance text-black/64">{description}</span>
-          </button>
+        {exploreCategories.map((category, index) => (
+          <CategoryCard key={`${category.label}-${index}`} category={category} index={index} />
         ))}
       </div>
     </section>
