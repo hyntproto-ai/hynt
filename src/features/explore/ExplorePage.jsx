@@ -9,13 +9,13 @@ import {
   MagnifyingGlass,
   MapPin,
   PaperPlaneTilt,
-  PhoneCall,
+  SealCheck,
   SlidersHorizontal,
   Star,
-  WhatsappLogo,
 } from '@phosphor-icons/react'
 import Button from '../../components/ui/Button'
 import InputBar from '../../components/ui/InputBar'
+import { ProfessionalProfilePage, categoryProfessionals } from '../home/HomeownerHomeTab'
 
 const roomCategories = [
   {
@@ -87,6 +87,7 @@ const projectViewerImages = [
 ]
 
 const projectViewerCreator = {
+  id: 'neha-singh',
   name: 'Neha Singh',
   role: 'Interior Designer',
   city: 'Mumbai',
@@ -96,8 +97,18 @@ const projectViewerCreator = {
 }
 
 const projectViewerProject = {
+  id: 'mehta-3bhk-bandra-west',
   title: 'Mehta 3BHK, Bandra West',
   subtitle: 'By Neha Singh',
+  category: 'Residential Interior',
+  location: 'Bandra West, Mumbai',
+  area: '1,420 sq.ft',
+  completedOn: 'Completed 2025',
+  budget: 'Premium',
+  description: 'A compact 3BHK apartment shaped around a calm modern Indian living room, concealed storage, layered evening lighting, and softer textures for a family that hosts often.',
+  scope: ['Living room styling', 'TV wall storage', 'Lighting plan', 'Soft furnishing', 'Art curation'],
+  palette: ['Warm grey', 'Black metal', 'Ivory fabric', 'Natural wood'],
+  images: projectViewerImages,
 }
 
 const trendingBrands = [
@@ -378,25 +389,18 @@ function RoomFeed({ room, setView }) {
   )
 }
 
-function ProjectFullscreenViewer({ room, onBack, onOpenProfile }) {
+function getCreatorProfile(creator) {
+  return categoryProfessionals.find((professional) => (
+    professional.id === creator?.id || professional.name === creator?.name
+  )) || categoryProfessionals[0]
+}
+
+function ProjectFullscreenViewer({ room, onBack, onOpenProfile, onOpenProject }) {
   const creator = projectViewerCreator
 
   return (
-    <section className="fixed left-1/2 top-0 z-[120] flex h-dvh w-full max-w-[390px] -translate-x-1/2 flex-col overflow-hidden bg-black text-white">
-      <div className="shrink-0 border-b border-[#e0e0e0] bg-[rgba(255,255,255,0.92)] text-black backdrop-blur-[16px]">
-        <ExploreTopbar
-          title={projectViewerProject.title}
-          subtitle={projectViewerProject.subtitle}
-          onBack={onBack}
-          actions={(
-            <button type="button" aria-label="More project actions" className="grid size-9 place-items-center rounded-full text-black">
-              <DotsThreeVertical size={22} weight="bold" />
-            </button>
-          )}
-        />
-      </div>
-
-      <main className="relative min-h-0 flex-1 overflow-hidden bg-black">
+    <section className="fixed left-1/2 top-0 z-[120] h-dvh w-full max-w-[390px] -translate-x-1/2 overflow-hidden bg-black text-white">
+      <main className="relative h-full overflow-hidden bg-black">
         <div className="no-scrollbar flex h-full snap-x snap-mandatory overflow-x-auto">
           {projectViewerImages.map((image, index) => (
             <div key={`${image}-${index}`} className="relative h-full w-full shrink-0 snap-center">
@@ -404,54 +408,186 @@ function ProjectFullscreenViewer({ room, onBack, onOpenProfile }) {
             </div>
         ))}
         </div>
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/12 via-transparent to-black/48" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.58)_0%,rgba(0,0,0,0.18)_13%,rgba(0,0,0,0)_42%,rgba(0,0,0,0.68)_100%)]" />
 
-        <span className="typo-meta absolute right-4 top-4 z-20 rounded-lg bg-white px-2.5 py-1 text-black">
-          1/5
-        </span>
+        <header className="absolute inset-x-0 top-0 z-20 bg-[linear-gradient(180deg,rgba(0,0,0,1)_0%,rgba(0,0,0,0)_100%)] px-4 py-3">
+          <div className="flex items-center justify-between gap-3 py-1">
+            <button type="button" onClick={onBack} aria-label="Back to room feed" className="flex min-w-0 items-center gap-4 text-left text-white">
+              <span className="grid size-6 shrink-0 place-items-center rounded">
+                <CaretLeft size={24} />
+              </span>
+            </button>
+            <button type="button" aria-label="More project actions" className="grid size-9 shrink-0 place-items-center rounded-full text-white">
+              <DotsThreeVertical size={22} weight="bold" />
+            </button>
+          </div>
+        </header>
+
+        <div className="absolute inset-x-0 bottom-0 z-20 bg-[linear-gradient(0deg,rgba(0,0,0,1)_0%,rgba(0,0,0,0)_100%)] px-4 pb-[max(32px,env(safe-area-inset-bottom))] pt-2">
+          <div className="grid h-12 grid-cols-[48px_1fr_48px] items-center gap-2">
+            <button type="button" onClick={() => onOpenProject?.(projectViewerProject)} aria-label={`Open ${projectViewerProject.title} project`} className="relative size-12 shrink-0 overflow-visible">
+              {projectViewerImages.slice(0, 3).map((image, index) => {
+                const layerStyles = [
+                  'left-[5px] top-[6px] rotate-[-8deg] opacity-80',
+                  'left-[3px] top-[3px] rotate-[8deg] opacity-90',
+                  'left-0 top-0 rotate-0',
+                ]
+
+                return (
+                  <img
+                    key={`${image}-thumb`}
+                    src={image}
+                    alt=""
+                    className={`absolute size-11 rounded-[12px] border border-white/80 object-cover shadow-[0_8px_24px_rgba(0,0,0,0.28)] ${layerStyles[index]}`}
+                  />
+                )
+              })}
+            </button>
+            <div className="mx-auto flex w-[203px] items-center gap-2">
+              <button type="button" aria-label="Save project" className="grid size-12 shrink-0 place-items-center rounded-[16px] bg-white/18 text-white backdrop-blur-[18px]">
+                <BookmarkSimple size={22} />
+              </button>
+              <button type="button" className="typo-body-strong flex h-12 w-[147px] shrink-0 items-center justify-center gap-2 rounded-[16px] bg-black px-4 text-white shadow-[0_12px_28px_rgba(0,0,0,0.32)]">
+                <PaperPlaneTilt size={22} weight="fill" />
+                <span className="truncate">Send Inquiry</span>
+              </button>
+            </div>
+            <button type="button" onClick={() => onOpenProfile?.(creator)} aria-label={`Open ${creator.name} profile`} className="size-12 shrink-0 overflow-hidden rounded-full border border-white/80 bg-white p-0.5 shadow-[0_8px_24px_rgba(0,0,0,0.28)]">
+              <img src={creator.avatar} alt={creator.name} className="size-full rounded-full object-cover" />
+            </button>
+          </div>
+          <span className="sr-only">
+            {projectViewerProject.title}, {projectViewerProject.subtitle}, {creator.role} in {creator.city}, {creator.rating} stars from {creator.ratingsCount} ratings
+          </span>
+        </div>
       </main>
 
-      <footer className="shrink-0 rounded-t-[16px] bg-[#161616] pb-[max(16px,env(safe-area-inset-bottom))]">
-        <div className="flex justify-center py-2">
-          <span className="h-[5px] w-9 rounded-full bg-white/88" />
-        </div>
+      <span className="sr-only">{room?.title || 'Explore'} project preview</span>
+    </section>
+  )
+}
+
+function ProjectStat({ label, value }) {
+  return (
+    <div className="rounded-[16px] border border-[#e0e0e0] bg-white p-3">
+      <p className="typo-caption uppercase text-[#7a7a7a]">{label}</p>
+      <p className="typo-body-strong mt-1 text-black">{value}</p>
+    </div>
+  )
+}
+
+function ProfessionalProjectPage({ project, creator, onBack, onOpenProfile }) {
+  const profile = getCreatorProfile(creator)
+
+  return (
+    <section className="hynt-home-mobile-canvas relative mx-auto min-h-dvh w-full max-w-[390px] overflow-visible bg-white pb-[112px] text-black">
+      <ExploreChrome>
+        <ExploreTopbar
+          title="Project"
+          subtitle={project.title}
+          onBack={onBack}
+          actions={(
+            <button type="button" aria-label="Save project" className="grid size-9 place-items-center rounded-[12px] border border-[#e0e0e0] bg-white text-black">
+              <BookmarkSimple size={17} />
+            </button>
+          )}
+        />
+      </ExploreChrome>
+      <div className="h-[65px]" />
+
+      <div className="no-scrollbar flex snap-x snap-mandatory overflow-x-auto">
+        {project.images.map((image, index) => (
+          <figure key={`${image}-${index}`} className="relative h-[312px] w-full shrink-0 snap-center overflow-hidden bg-[#f2f2f2]">
+            <img src={image} alt="" className="absolute inset-0 size-full object-cover" />
+            <span className="typo-meta absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-black backdrop-blur">
+              {index + 1}/{project.images.length}
+            </span>
+          </figure>
+        ))}
+      </div>
+
+      <section className="px-4 py-5">
+        <p className="typo-caption typo-weight-bold uppercase text-[#267449]">{project.category}</p>
+        <h1 className="typo-title-20-strong mt-1 text-black">{project.title}</h1>
+        <p className="typo-meta mt-2 flex items-center gap-1 text-[#686868]">
+          <MapPin size={14} />
+          {project.location}
+        </p>
+
         <button
           type="button"
           onClick={() => onOpenProfile?.(creator)}
-          className="flex w-full items-center gap-3 border-b border-white/[0.04] bg-[#121212] p-4 text-left"
+          className="mt-4 flex w-full items-center gap-3 rounded-[18px] border border-[#e0e0e0] bg-[#fbfbfb] p-3 text-left"
         >
-          <img src={creator.avatar} alt={creator.name} className="size-14 shrink-0 rounded-[13px] border border-white/40 object-cover" />
+          <img src={profile.avatar} alt={profile.name} className="size-12 shrink-0 rounded-[14px] object-cover" />
           <span className="min-w-0 flex-1">
-            <span className="typo-body-strong block truncate text-white">{creator.name}</span>
-            <span className="typo-meta mt-1 block truncate text-white/64">{creator.role}, {creator.city}</span>
-          </span>
-          <span className="flex shrink-0 flex-col items-end gap-1">
-            <span className="flex items-center gap-1.5">
-              <Star size={16} weight="fill" className="text-[#ffd34e]" />
-              <span className="typo-body-strong text-white">{creator.rating}</span>
+            <span className="typo-caption text-[#7a7a7a]">Uploaded by</span>
+            <span className="mt-0.5 flex min-w-0 items-center gap-1">
+              <span className="typo-body-strong truncate text-black">{profile.name}</span>
+              <SealCheck size={16} weight="fill" className="shrink-0 text-[#26C485]" />
             </span>
-            <span className="typo-caption text-white/48">{creator.ratingsCount} Ratings</span>
+            <span className="typo-caption mt-0.5 flex items-center gap-1 text-[#686868]">
+              <Star size={13} weight="fill" className="text-[#F5B82E]" />
+              {profile.rating} {'|'} {profile.role}
+            </span>
           </span>
+          <ArrowRight size={18} />
         </button>
 
-        <div className="flex h-[72px] items-center gap-2 px-4 pt-2">
-          <button type="button" aria-label="Save project" className="grid h-12 w-12 shrink-0 place-items-center rounded-[16px] bg-[#5fc18a] text-white">
-            <BookmarkSimple size={17} weight="fill" />
-          </button>
-          <button type="button" className="typo-body-strong flex h-12 min-w-0 flex-1 items-center justify-center gap-2 rounded-[16px] bg-white px-4 text-black shadow-[0_4px_8px_-2px_rgba(0,0,0,0.16)]">
-            <PaperPlaneTilt size={20} weight="fill" />
-            <span>Send Inquiry</span>
-          </button>
-          <a href="tel:+910000000000" aria-label="Call designer" className="grid h-12 w-12 shrink-0 place-items-center rounded-[16px] bg-white text-black">
-            <PhoneCall size={17} weight="fill" />
-          </a>
-          <a href="https://wa.me/910000000000" aria-label="Message designer on WhatsApp" className="grid h-12 w-12 shrink-0 place-items-center rounded-[16px] bg-white text-black">
-            <WhatsappLogo size={17} weight="fill" />
-          </a>
+        <div className="mt-5 grid grid-cols-2 gap-2">
+          <ProjectStat label="Area" value={project.area} />
+          <ProjectStat label="Budget" value={project.budget} />
+          <ProjectStat label="Timeline" value={project.completedOn} />
+          <ProjectStat label="Images" value={`${project.images.length} photos`} />
         </div>
-      </footer>
+      </section>
 
-      <span className="sr-only">{room?.title || 'Explore'} project preview</span>
+      <div className="h-px bg-[#e0e0e0]" />
+
+      <section className="px-4 py-5">
+        <h2 className="typo-title-16-strong text-black">About this project</h2>
+        <p className="typo-body mt-2 leading-[1.65] text-[#525252]">{project.description}</p>
+      </section>
+
+      <section className="px-4 pb-5">
+        <h2 className="typo-title-16-strong text-black">Scope covered</h2>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {project.scope.map((item) => (
+            <span key={item} className="typo-caption rounded-full border border-[#e0e0e0] bg-white px-3 py-2 text-[#525252]">
+              {item}
+            </span>
+          ))}
+        </div>
+      </section>
+
+      <section className="px-4 pb-6">
+        <h2 className="typo-title-16-strong text-black">Project gallery</h2>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          {project.images.map((image, index) => (
+            <button key={`${image}-gallery-${index}`} type="button" className={`relative overflow-hidden rounded-[16px] bg-[#f2f2f2] ${index === 0 ? 'col-span-2 h-[210px]' : 'h-[150px]'}`}>
+              <img src={image} alt="" className="absolute inset-0 size-full object-cover" loading="lazy" />
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="px-4 pb-6">
+        <h2 className="typo-title-16-strong text-black">Palette</h2>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          {project.palette.map((item) => (
+            <div key={item} className="rounded-[16px] border border-[#e0e0e0] bg-[#fbfbfb] p-3">
+              <p className="typo-body-strong text-black">{item}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <div className="fixed bottom-0 left-1/2 z-40 w-full max-w-[390px] -translate-x-1/2 border-t border-[#e0e0e0] bg-white px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-3">
+        <button type="button" className="typo-body-strong flex h-12 w-full items-center justify-center gap-2 rounded-[16px] bg-black px-4 text-white">
+          <PaperPlaneTilt size={22} weight="fill" />
+          Send Inquiry
+        </button>
+      </div>
     </section>
   )
 }
@@ -523,7 +659,7 @@ function ExploreLanding({ onDepthChange }) {
   const [mode, setMode] = useState('ideas')
   const [view, setView] = useState('landing')
   const [selectedRoom, setSelectedRoom] = useState(roomCategories[3])
-  const [, setSelectedCreator] = useState(null)
+  const [selectedCreator, setSelectedCreator] = useState(null)
   const chromeHidden = useExploreChromeVisibility()
 
   useEffect(() => {
@@ -536,7 +672,32 @@ function ExploreLanding({ onDepthChange }) {
       <ProjectFullscreenViewer
         room={selectedRoom}
         onBack={() => setView('room')}
-        onOpenProfile={(creator) => setSelectedCreator(creator)}
+        onOpenProfile={(creator) => {
+          setSelectedCreator(creator)
+          setView('professional-profile')
+        }}
+        onOpenProject={() => setView('professional-project')}
+      />
+    )
+  }
+  if (view === 'professional-profile') {
+    return (
+      <ProfessionalProfilePage
+        professional={getCreatorProfile(selectedCreator)}
+        onBack={() => setView('viewer')}
+      />
+    )
+  }
+  if (view === 'professional-project') {
+    return (
+      <ProfessionalProjectPage
+        project={projectViewerProject}
+        creator={projectViewerCreator}
+        onBack={() => setView('viewer')}
+        onOpenProfile={(creator) => {
+          setSelectedCreator(creator)
+          setView('professional-profile')
+        }}
       />
     )
   }

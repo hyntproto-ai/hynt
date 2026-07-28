@@ -14,7 +14,9 @@ import {
 } from '@phosphor-icons/react'
 import Button from '../../components/ui/Button'
 import HomeBannerCarousel from './HomeBannerCarousel'
+import BlogArticleDetailPage from './BlogArticleDetailPage'
 import HomeBlogsSection from './HomeBlogsSection'
+import { AllEventsPage, EventDetailPage } from './HomeEventsPages'
 import HomeExploreCategoriesGrid from './HomeExploreCategoriesGrid'
 
 const professionalProjectTools = [
@@ -226,11 +228,47 @@ function ProfessionalHomeTab({
   onOpenPortfolio,
 }) {
   const eventsRailRef = useRef(null)
+  const [selectedArticle, setSelectedArticle] = useState(null)
+  const [eventView, setEventView] = useState('home')
+  const [selectedEvent, setSelectedEvent] = useState(null)
 
   useLayoutEffect(() => {
     if (!eventsRailRef.current) return
     eventsRailRef.current.scrollLeft = 0
   }, [])
+
+  if (selectedArticle) {
+    return (
+      <BlogArticleDetailPage
+        article={selectedArticle}
+        onBack={() => setSelectedArticle(null)}
+      />
+    )
+  }
+
+  if (eventView === 'events') {
+    return (
+      <AllEventsPage
+        events={homepageEvents}
+        onBack={() => setEventView('home')}
+        onEventSelect={(event) => {
+          setSelectedEvent(event)
+          setEventView('event-detail')
+        }}
+      />
+    )
+  }
+
+  if (eventView === 'event-detail') {
+    return (
+      <EventDetailPage
+        event={selectedEvent}
+        events={homepageEvents}
+        onBack={() => setEventView('events')}
+        onShowAll={() => setEventView('events')}
+      />
+    )
+  }
 
   return (
     <>
@@ -254,11 +292,19 @@ function ProfessionalHomeTab({
       <section className="px-4 py-5">
         <div className="flex items-center justify-between">
           <h2 className="typo-section-title">Upcoming Events</h2>
-          <div className="typo-utility flex items-center gap-1">View all <ArrowRight size={16} /></div>
+          <button type="button" onClick={() => setEventView('events')} className="typo-utility flex items-center gap-1">View all <ArrowRight size={16} /></button>
         </div>
         <div ref={eventsRailRef} className="no-scrollbar mt-4 flex gap-3 overflow-x-auto overflow-y-visible pb-1">
           {homepageEvents.map((event) => (
-            <article key={event.title} className="min-h-[252px] w-[175px] shrink-0 rounded-3xl border border-[#e0e0e0] bg-[#fbfbfb] p-2">
+            <button
+              key={event.title}
+              type="button"
+              onClick={() => {
+                setSelectedEvent(event)
+                setEventView('event-detail')
+              }}
+              className="min-h-[252px] w-[175px] shrink-0 rounded-3xl border border-[#e0e0e0] bg-[#fbfbfb] p-2 text-left"
+            >
               <div className="relative h-36 overflow-hidden rounded-2xl border border-[#e0e0e0] bg-white">
                 <img src={event.image} alt={event.title} className="size-full object-cover" />
                 <span className="typo-meta absolute right-2 top-2 rounded-lg border border-[#333] bg-black/70 px-2 py-1 text-white backdrop-blur">{event.interested}</span>
@@ -268,14 +314,14 @@ function ProfessionalHomeTab({
                 <p className="typo-meta mt-1 flex items-center gap-1 text-[#808080]"><CalendarDots size={16} />{event.date}</p>
                 <p className="typo-meta mt-1 flex items-center gap-1 text-[#808080]"><MapPinSimpleArea size={16} />{event.city}</p>
               </div>
-            </article>
+            </button>
           ))}
         </div>
       </section>
 
       <div className="h-[6px] w-full bg-[#e0e0e0]" />
 
-      <HomeBlogsSection onViewAll={onOpenBlogs} />
+      <HomeBlogsSection onViewAll={onOpenBlogs} onArticleSelect={setSelectedArticle} />
     </>
   )
 }

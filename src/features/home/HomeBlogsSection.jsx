@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef } from 'react'
 import { ArrowRight, Clock } from '@phosphor-icons/react'
 import { homeBlogArticles } from './homeBlogArticles'
 
-function HomeBlogsSection({ onViewAll }) {
+function HomeBlogsSection({ onViewAll, onArticleSelect }) {
   const railRef = useRef(null)
 
   useLayoutEffect(() => {
@@ -20,7 +20,12 @@ function HomeBlogsSection({ onViewAll }) {
       </div>
       <div ref={railRef} className="no-scrollbar mt-4 flex gap-3 overflow-x-auto overflow-y-visible pb-1">
         {homeBlogArticles.slice(0, 3).map((article, index) => (
-          <article key={`${article.title}-${index}`} className="w-[175px] shrink-0 overflow-hidden rounded-3xl border border-[#e0e0e0] bg-[#fbfbfb] pb-4">
+          <button
+            key={`${article.id || article.title}-${index}`}
+            type="button"
+            onClick={() => onArticleSelect?.(article)}
+            className="w-[175px] shrink-0 overflow-hidden rounded-3xl border border-[#e0e0e0] bg-[#fbfbfb] pb-4 text-left"
+          >
             <div className="h-36 overflow-hidden rounded-t-2xl border-b border-[#e0e0e0] bg-white">
               <img src={article.image} alt="" className="size-full object-cover" />
             </div>
@@ -37,7 +42,7 @@ function HomeBlogsSection({ onViewAll }) {
                 </p>
               </div>
             </div>
-          </article>
+          </button>
         ))}
       </div>
     </section>

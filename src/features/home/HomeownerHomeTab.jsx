@@ -27,7 +27,9 @@ import {
 } from '@phosphor-icons/react'
 import Button from '../../components/ui/Button'
 import HomeBannerCarousel from './HomeBannerCarousel'
+import BlogArticleDetailPage from './BlogArticleDetailPage'
 import HomeBlogsSection from './HomeBlogsSection'
+import { AllEventsPage, EventDetailPage } from './HomeEventsPages'
 import HomeExploreCategoriesGrid from './HomeExploreCategoriesGrid'
 import HomeSearchBar from './HomeSearchBar'
 import HomeTopPromo from './HomeTopPromo'
@@ -870,6 +872,8 @@ function HomeownerHomeTab({
   const [view, setView] = useState('home')
   const [selectedCategory, setSelectedCategory] = useState(null)
   const [selectedProfessional, setSelectedProfessional] = useState(categoryProfessionals[0])
+  const [selectedArticle, setSelectedArticle] = useState(null)
+  const [selectedEvent, setSelectedEvent] = useState(null)
 
   useLayoutEffect(() => {
     if (!eventsRailRef.current) return
@@ -933,6 +937,39 @@ function HomeownerHomeTab({
     )
   }
 
+  if (view === 'blog-article') {
+    return (
+      <BlogArticleDetailPage
+        article={selectedArticle}
+        onBack={() => setView('home')}
+      />
+    )
+  }
+
+  if (view === 'events') {
+    return (
+      <AllEventsPage
+        events={homepageEvents}
+        onBack={() => setView('home')}
+        onEventSelect={(event) => {
+          setSelectedEvent(event)
+          setView('event-detail')
+        }}
+      />
+    )
+  }
+
+  if (view === 'event-detail') {
+    return (
+      <EventDetailPage
+        event={selectedEvent}
+        events={homepageEvents}
+        onBack={() => setView('events')}
+        onShowAll={() => setView('events')}
+      />
+    )
+  }
+
   return (
     <section className="hynt-home-mobile-canvas relative mx-auto w-full max-w-[390px] overflow-visible bg-white">
       <div ref={topDockRef} className={`hynt-home-topdock hynt-home-topdock--fixed hynt-home-topdock--safe hynt-home-green-dock ${isHomeDockDense ? 'hynt-home-topdock--dense hynt-home-green-dock--collapsed' : ''}`}>
@@ -968,11 +1005,19 @@ function HomeownerHomeTab({
         <section className="py-4">
           <div className="flex h-6 items-center justify-between px-4">
             <h2 className="typo-section-title">Events</h2>
-            <button type="button" className="typo-utility flex h-5 items-center gap-1">View all <ArrowRight size={20} /></button>
+            <button type="button" onClick={() => setView('events')} className="typo-utility flex h-5 items-center gap-1">View all <ArrowRight size={20} /></button>
           </div>
           <div ref={eventsRailRef} className="no-scrollbar mt-4 flex gap-3 overflow-x-auto overflow-y-visible px-3 pb-1">
             {homepageEvents.map((event) => (
-              <article key={event.title} className="min-h-[252px] w-[175px] shrink-0 rounded-3xl border border-[#e0e0e0] bg-[#fbfbfb] p-2">
+              <button
+                key={event.title}
+                type="button"
+                onClick={() => {
+                  setSelectedEvent(event)
+                  setView('event-detail')
+                }}
+                className="min-h-[252px] w-[175px] shrink-0 rounded-3xl border border-[#e0e0e0] bg-[#fbfbfb] p-2 text-left"
+              >
                 <div className="relative h-36 overflow-hidden rounded-2xl border border-[#e0e0e0] bg-white">
                   <img src={event.image} alt={event.title} className="size-full object-cover" />
                   <span className="typo-meta absolute right-2 top-2 rounded-lg border border-[#333] bg-black/70 px-2 py-1 text-white backdrop-blur">{event.interested}</span>
@@ -982,7 +1027,7 @@ function HomeownerHomeTab({
                   <p className="typo-meta mt-1 flex items-center gap-1 text-[#808080]"><CalendarDots size={16} />{event.date}</p>
                   <p className="typo-meta mt-1 flex items-center gap-1 text-[#808080]"><MapPinSimpleArea size={16} />{event.city}</p>
                 </div>
-              </article>
+              </button>
             ))}
           </div>
         </section>
@@ -993,7 +1038,13 @@ function HomeownerHomeTab({
 
         <HomeDivider thick />
 
-        <HomeBlogsSection onViewAll={onOpenBlogs} />
+        <HomeBlogsSection
+          onViewAll={onOpenBlogs}
+          onArticleSelect={(article) => {
+            setSelectedArticle(article)
+            setView('blog-article')
+          }}
+        />
 
         <HomeBrandWatermark />
       </div>
