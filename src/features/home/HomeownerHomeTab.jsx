@@ -6,6 +6,7 @@ import {
   CalendarDots,
   CaretLeft,
   CaretRight,
+  CheckCircle,
   CheckSquareOffset,
   DotsThreeVertical,
   Export,
@@ -30,6 +31,7 @@ import HomeBannerCarousel from './HomeBannerCarousel'
 import BlogArticleDetailPage from './BlogArticleDetailPage'
 import HomeBlogsSection from './HomeBlogsSection'
 import { AllEventsPage, EventDetailPage } from './HomeEventsPages'
+import { categoryProfessionalImages, categoryProfessionals } from './categoryProfessionals'
 import HomeExploreCategoriesGrid from './HomeExploreCategoriesGrid'
 import HomeSearchBar from './HomeSearchBar'
 import HomeTopPromo from './HomeTopPromo'
@@ -65,64 +67,6 @@ function HomeNestedTopbar({ title, onBack }) {
     </div>
   )
 }
-
-const categoryProfessionalImages = Array.from({ length: 15 }, (_, index) => (
-  `/hynt-home/category-professionals/portfolio-${index + 1}.jpeg`
-))
-
-export const categoryProfessionals = [
-  {
-    id: 'rohan-mehta',
-    name: 'Rohan Mehta',
-    role: 'Interior Designer',
-    city: 'Mumbai',
-    since: 'Since 2016',
-    experience: '8 years',
-    rating: '4.8',
-    reviews: '210 reviews',
-    reviewCount: '210',
-    services: '3D Visualization, Commercial Interiors, Residential Interiors, Online Consultation',
-    serviceTags: ['Full Home Design', 'Turnkey Execution', '2D Floor Plan', '3D Walkthrough', 'Moodboard', 'Modular Kitchen', 'Vastu-Compliant', 'Site supervision'],
-    showroom: 'Shop No. 2, place, at that otherplace',
-    hours: '9am - 9pm',
-    avatar: '/hynt-home/explore/neha-singh.png',
-    images: categoryProfessionalImages.slice(0, 5),
-  },
-  {
-    id: 'aarya-studio',
-    name: 'Aarya Design Studio',
-    role: 'Interior Designer',
-    city: 'Mumbai',
-    since: 'Since 2018',
-    experience: '6 years',
-    rating: '4.7',
-    reviews: '168 reviews',
-    reviewCount: '168',
-    services: 'Residential Interiors, Modular Planning, Renovation Consultation, Styling',
-    serviceTags: ['Full Home Design', 'Turnkey Execution', '2D Floor Plan', '3D Walkthrough', 'Moodboard', 'Styling', 'Site supervision'],
-    showroom: 'Studio 14, Linking Road, Bandra West',
-    hours: '10am - 8pm',
-    avatar: '/hynt-home/explore/neha-singh.png',
-    images: categoryProfessionalImages.slice(5, 10),
-  },
-  {
-    id: 'neha-singh',
-    name: 'Neha Singh',
-    role: 'Interior Designer',
-    city: 'Mumbai',
-    since: 'Since 2016',
-    experience: '8 years',
-    rating: '4.8',
-    reviews: '210 reviews',
-    reviewCount: '210',
-    services: '3D Visualization, Commercial Interiors, Residential Interiors, Online Consultation',
-    serviceTags: ['Full Home Design', 'Turnkey Execution', '2D Floor Plan', '3D Walkthrough', 'Moodboard', 'Modular Kitchen', 'Vastu-Compliant', 'Site supervision'],
-    showroom: 'Shop No. 2, place, at that otherplace',
-    hours: '9am - 9pm',
-    avatar: '/hynt-home/explore/neha-singh.png',
-    images: categoryProfessionalImages.slice(10, 15),
-  },
-]
 
 const profileProducts = [
   {
@@ -361,7 +305,7 @@ function getProfileWorkItems(professional) {
   }))
 }
 
-function WorkTopbar({ title, onBack }) {
+function WorkTopbar({ title, onBack, onAdd, addLabel = 'Add Work item' }) {
   return (
     <div className="border-b border-black/[0.04] bg-white">
       <header className="flex h-[57px] items-center justify-between px-4 py-2">
@@ -369,15 +313,19 @@ function WorkTopbar({ title, onBack }) {
           <CaretLeft size={24} />
         </button>
         <h1 className="typo-section-title min-w-0 flex-1 truncate px-2 text-black">{title}</h1>
-        <button type="button" aria-label={`Add ${title} item`} className="grid size-10 place-items-center rounded-full text-black">
-          <Plus size={24} />
-        </button>
+        {onAdd ? (
+          <button type="button" onClick={onAdd} aria-label={addLabel} className="grid size-10 place-items-center rounded-full text-black">
+            <Plus size={24} />
+          </button>
+        ) : (
+          <span className="size-10 shrink-0" aria-hidden="true" />
+        )}
       </header>
     </div>
   )
 }
 
-function WorkTabs({ selectedTab, onSelectTab }) {
+function WorkTabs({ selectedTab, onSelectTab, isSelectionLocked = false }) {
   const tabs = [
     ['all', 'All'],
     ['collections', 'Collections'],
@@ -393,8 +341,11 @@ function WorkTabs({ selectedTab, onSelectTab }) {
           <button
             key={key}
             type="button"
-            onClick={() => onSelectTab(key)}
-            className={`typo-meta shrink-0 rounded-full border px-4 py-2 ${selected ? 'border-[#26c485] bg-[#26c485] text-white' : 'border-[#e0e0e0] bg-white text-black'}`}
+            onClick={() => {
+              if (isSelectionLocked && key !== 'all') return
+              onSelectTab(key)
+            }}
+            className={`typo-meta shrink-0 rounded-full border px-4 py-2 ${selected ? 'border-[#26c485] bg-[#26c485] text-white' : 'border-[#e0e0e0] bg-white text-black'} ${isSelectionLocked && key !== 'all' ? 'opacity-40' : ''}`}
           >
             {label}
           </button>
@@ -404,16 +355,34 @@ function WorkTabs({ selectedTab, onSelectTab }) {
   )
 }
 
-function WorkImageTile({ item, title }) {
+function WorkImageTile({ item, title, countLabel, isSelecting = false, selected = false, onSelect }) {
   return (
-    <button type="button" className="relative mb-3 w-full break-inside-avoid overflow-hidden rounded-[14px] bg-[#f2f2f2]" style={{ height: item.height }}>
+    <button
+      type="button"
+      onClick={() => onSelect?.(item)}
+      className="relative mb-3 w-full break-inside-avoid overflow-hidden rounded-[16px] bg-[#f2f2f2]"
+      style={{ height: item.height }}
+    >
       <img src={item.image} alt="" className="absolute inset-0 size-full object-cover" loading="lazy" />
+      {selected ? (
+        <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(38,196,133,0.22)_0%,rgba(38,196,133,0.05)_46%,rgba(38,196,133,0.30)_100%)] shadow-[inset_0_-52px_56px_rgba(38,196,133,0.28),inset_0_24px_36px_rgba(38,196,133,0.14)]" />
+      ) : null}
       {item.isVideo ? (
         <span className="absolute right-2 top-2 grid size-8 place-items-center rounded-full bg-black/35 text-white backdrop-blur">
           <Play size={14} weight="fill" />
         </span>
       ) : null}
-      <span className="absolute bottom-2 right-2 grid size-8 place-items-center rounded-lg bg-white text-black shadow-[0_4px_12px_rgba(0,0,0,0.12)]">
+      {countLabel ? (
+        <span className="typo-meta absolute right-2 top-2 rounded-[8px] bg-white px-2 py-1 text-black shadow-[0_4px_12px_rgba(0,0,0,0.12)]">
+          {countLabel}
+        </span>
+      ) : null}
+      {isSelecting ? (
+        <span className={`absolute left-2 top-2 grid size-7 place-items-center rounded-[8px] border text-white ${selected ? 'border-white/80 bg-black/78 shadow-[0_6px_18px_rgba(0,0,0,0.24)]' : 'border-white/80 bg-black/28 backdrop-blur'}`}>
+          {selected ? <CheckCircle size={18} weight="fill" /> : null}
+        </span>
+      ) : null}
+      <span className="absolute bottom-2 right-2 grid size-8 place-items-center rounded-[8px] bg-white text-black shadow-[0_4px_12px_rgba(0,0,0,0.12)]">
         <BookmarkSimple size={16} />
       </span>
       {title ? (
@@ -425,26 +394,41 @@ function WorkImageTile({ item, title }) {
   )
 }
 
-function WorkAllGrid({ professional }) {
+function WorkAllGrid({ items, isSelecting, selectedIds, onToggleItem }) {
   return (
     <div className="columns-2 gap-3 px-4 pb-6">
-      {getProfileWorkItems(professional).map((item) => (
-        <WorkImageTile key={item.id} item={item} />
+      {items.map((item) => (
+        <WorkImageTile
+          key={item.id}
+          item={item}
+          isSelecting={isSelecting}
+          selected={selectedIds.includes(item.id)}
+          onSelect={isSelecting ? onToggleItem : undefined}
+        />
       ))}
     </div>
   )
 }
 
-function WorkCollectionsGrid({ professional }) {
+function WorkCollectionsGrid({ professional, collections = [] }) {
   const collectionTitles = ['Bandra Luxe 3BHK', 'Bandra Modern Haven', 'Urban Retreat 3BHK', 'Warm Minimal Home', 'Powai Family Home', 'Compact Studio']
-  const items = getProfileWorkItems(professional).slice(0, 6)
+  const defaultCollections = getProfileWorkItems(professional).slice(0, 6).map((item, index) => ({
+    id: item.id,
+    item,
+    title: collectionTitles[index],
+    count: '1/5',
+  }))
+  const collectionItems = [...collections, ...defaultCollections]
 
   return (
     <div className="grid grid-cols-2 gap-x-3 gap-y-5 px-4 pb-6">
-      {items.map((item, index) => (
-        <article key={item.id} className="min-w-0">
-          <WorkImageTile item={{ ...item, height: index % 2 === 0 ? 178 : 148 }} />
-          <h2 className="typo-meta typo-weight-semibold -mt-1 truncate text-black">{collectionTitles[index]}</h2>
+      {collectionItems.map((collection, index) => (
+        <article key={collection.id} className="min-w-0">
+          <WorkImageTile
+            item={{ ...collection.item, height: index % 2 === 0 ? 178 : 148 }}
+            countLabel={collection.count}
+          />
+          <h2 className="typo-meta typo-weight-semibold -mt-1 truncate text-black">{collection.title}</h2>
         </article>
       ))}
     </div>
@@ -455,11 +439,11 @@ function WorkProductsGrid() {
   return (
     <div className="grid grid-cols-2 gap-3 px-4 pb-6">
       {profileProducts.concat(profileProducts).map((product, index) => (
-        <article key={`${product.id}-${index}`} className="min-w-0 overflow-hidden rounded-[14px] bg-white">
-          <div className="relative h-[150px] overflow-hidden rounded-[14px] bg-[#f2f2f2]">
+        <article key={`${product.id}-${index}`} className="min-w-0 bg-white">
+          <div className="relative h-[150px] overflow-hidden rounded-[16px] bg-[#f2f2f2]">
             <img src={product.image} alt="" className="absolute inset-0 size-full object-cover" loading="lazy" />
-            <span className="typo-meta absolute right-2 top-2 rounded-full bg-white px-2 py-1 text-black">1/5</span>
-            <button type="button" aria-label={`Save ${product.title}`} className="absolute bottom-2 right-2 grid size-8 place-items-center rounded-lg bg-white text-black shadow-[0_4px_12px_rgba(0,0,0,0.12)]">
+            <span className="typo-meta absolute right-2 top-2 rounded-[8px] bg-white px-2 py-1 text-black">1/5</span>
+            <button type="button" aria-label={`Save ${product.title}`} className="absolute bottom-2 right-2 grid size-8 place-items-center rounded-[8px] bg-white text-black shadow-[0_4px_12px_rgba(0,0,0,0.12)]">
               <BookmarkSimple size={16} />
             </button>
           </div>
@@ -475,24 +459,116 @@ function WorkProductsGrid() {
 
 function ProfileWorkPage({ professional, initialTab = 'all', onBack }) {
   const [selectedTab, setSelectedTab] = useState(initialTab)
+  const [isCreatingCollection, setIsCreatingCollection] = useState(false)
+  const [selectedWorkIds, setSelectedWorkIds] = useState([])
+  const [collectionName, setCollectionName] = useState('')
+  const [createdCollections, setCreatedCollections] = useState([])
+  const workItems = getProfileWorkItems(professional)
+  const selectedItems = workItems.filter((item) => selectedWorkIds.includes(item.id))
 
   useLayoutEffect(() => {
     if (typeof window === 'undefined') return
     window.scrollTo({ top: 0, left: 0 })
   }, [initialTab])
 
+  const startCollectionFlow = () => {
+    setSelectedTab('all')
+    setIsCreatingCollection(true)
+    setSelectedWorkIds([])
+    setCollectionName('')
+  }
+
+  const cancelCollectionFlow = () => {
+    setIsCreatingCollection(false)
+    setSelectedWorkIds([])
+    setCollectionName('')
+  }
+
+  const toggleSelectedWorkItem = (item) => {
+    setSelectedWorkIds((current) => (
+      current.includes(item.id)
+        ? current.filter((id) => id !== item.id)
+        : [...current, item.id]
+    ))
+  }
+
+  const createCollection = () => {
+    if (!selectedItems.length) return
+    const title = collectionName.trim() || `New collection ${createdCollections.length + 1}`
+    const firstItem = selectedItems[0]
+    setCreatedCollections((current) => [
+      {
+        id: `created-${Date.now()}`,
+        item: firstItem,
+        title,
+        count: `${selectedItems.length}/5`,
+      },
+      ...current,
+    ])
+    setSelectedTab('collections')
+    cancelCollectionFlow()
+  }
+
   return (
-    <section className="hynt-home-mobile-canvas relative mx-auto min-h-dvh w-full max-w-[390px] overflow-visible bg-white">
+    <section className={`hynt-home-mobile-canvas relative mx-auto min-h-dvh w-full max-w-[390px] overflow-visible bg-white ${isCreatingCollection ? 'pb-[156px]' : ''}`}>
       <div className="fixed left-1/2 top-0 z-50 w-full max-w-[390px] -translate-x-1/2 bg-white pt-[env(safe-area-inset-top)]">
-        <WorkTopbar title="Work" onBack={onBack} />
-        <WorkTabs selectedTab={selectedTab} onSelectTab={setSelectedTab} />
+        <WorkTopbar
+          title={isCreatingCollection ? 'New collection' : 'Work'}
+          onBack={isCreatingCollection ? cancelCollectionFlow : onBack}
+          onAdd={isCreatingCollection ? undefined : startCollectionFlow}
+        />
+        <WorkTabs
+          selectedTab={selectedTab}
+          onSelectTab={setSelectedTab}
+          isSelectionLocked={isCreatingCollection}
+        />
       </div>
       <div className="pt-[calc(117px+env(safe-area-inset-top))]">
-        {selectedTab === 'all' ? <WorkAllGrid professional={professional} /> : null}
-        {selectedTab === 'collections' ? <WorkCollectionsGrid professional={professional} /> : null}
+        {isCreatingCollection ? (
+          <div className="px-4 pb-4">
+            <p className="typo-body-strong text-black">Select photos from All</p>
+            <p className="typo-caption mt-1 text-[#686868]">Pick the uploaded work images that should become a new collection.</p>
+          </div>
+        ) : null}
+        {selectedTab === 'all' ? (
+          <WorkAllGrid
+            items={workItems}
+            isSelecting={isCreatingCollection}
+            selectedIds={selectedWorkIds}
+            onToggleItem={toggleSelectedWorkItem}
+          />
+        ) : null}
+        {selectedTab === 'collections' ? <WorkCollectionsGrid professional={professional} collections={createdCollections} /> : null}
         {selectedTab === 'products' ? <WorkProductsGrid /> : null}
         {selectedTab === 'catalogue' ? <WorkProductsGrid /> : null}
       </div>
+      {isCreatingCollection ? (
+        <div className="fixed bottom-0 left-1/2 z-50 w-full max-w-[390px] -translate-x-1/2 border-t border-[#e0e0e0] bg-white px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-3">
+          <label className="block">
+            <span className="typo-caption text-[#686868]">Collection name</span>
+            <input
+              type="text"
+              value={collectionName}
+              onChange={(event) => setCollectionName(event.target.value)}
+              placeholder="Bandra living room"
+              className="typo-body mt-1 h-11 w-full rounded-[12px] border border-[#d9d9d9] bg-white px-3 text-black outline-none focus:border-[#26c485]"
+            />
+          </label>
+          <div className="mt-3 flex items-center gap-2">
+            <button type="button" onClick={cancelCollectionFlow} className="typo-body-strong h-12 w-[116px] rounded-[16px] border border-[#d9d9d9] bg-white text-black">
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={createCollection}
+              disabled={!selectedItems.length}
+              className="typo-body-strong h-12 min-w-0 flex-1 rounded-[16px] bg-black px-4 text-white disabled:bg-[#d9d9d9] disabled:text-[#7a7a7a]"
+            >
+              Create collection ({selectedItems.length})
+            </button>
+          </div>
+        </div>
+      ) : null}
     </section>
   )
 }
@@ -536,8 +612,8 @@ function ProfileProducts({ onOpenWork }) {
           <article key={product.id} className="w-[171px] shrink-0 overflow-hidden rounded-[14px] border border-[#e0e0e0] bg-white">
             <div className="relative h-[139px] bg-[#f2f2f2]">
               <img src={product.image} alt="" className="absolute inset-0 size-full object-cover" />
-              <span className="typo-meta absolute right-2 top-2 rounded-full bg-white px-2 py-1 text-black">1/5</span>
-              <button type="button" aria-label={`Save ${product.title}`} className="absolute bottom-2 right-2 grid size-7 place-items-center rounded-lg bg-white text-black">
+              <span className="typo-meta absolute right-2 top-2 rounded-[8px] bg-white px-2 py-1 text-black">1/5</span>
+              <button type="button" aria-label={`Save ${product.title}`} className="absolute bottom-2 right-2 grid size-7 place-items-center rounded-[8px] bg-white text-black">
                 <BookmarkSimple size={16} />
               </button>
             </div>

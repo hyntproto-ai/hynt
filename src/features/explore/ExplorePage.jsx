@@ -15,7 +15,8 @@ import {
 } from '@phosphor-icons/react'
 import Button from '../../components/ui/Button'
 import InputBar from '../../components/ui/InputBar'
-import { ProfessionalProfilePage, categoryProfessionals } from '../home/HomeownerHomeTab'
+import { categoryProfessionals } from '../home/categoryProfessionals'
+import { ProfessionalProfilePage } from '../home/HomeownerHomeTab'
 
 const roomCategories = [
   {
