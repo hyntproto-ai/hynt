@@ -22,6 +22,7 @@ import {
   SealCheck,
   Sparkle,
   Star,
+  Tag,
   Trophy,
   WhatsappLogo,
   X,
@@ -305,7 +306,98 @@ function getProfileWorkItems(professional) {
   }))
 }
 
-function WorkTopbar({ title, onBack, onAdd, addLabel = 'Add Work item' }) {
+const collectionProjectDetails = [
+  {
+    category: 'Residential Interior',
+    location: 'Bandra West, Mumbai',
+    area: '1,420 sq.ft',
+    completedOn: 'Completed 2025',
+    budget: 'Premium',
+    description: 'A polished 3BHK renovation shaped around hotel-like calm, concealed storage, soft evening lighting, and tactile upholstery for a family that hosts often.',
+    scope: ['Full home styling', 'Living room storage', 'Lighting plan', 'Soft furnishing', 'Art curation'],
+    rooms: ['Living room', 'Primary bedroom', 'Dining', 'Guest bedroom'],
+    palette: ['Powder blue', 'Ivory fabric', 'Walnut veneer', 'Brushed steel'],
+  },
+  {
+    category: 'Residential Interior',
+    location: 'Bandra East, Mumbai',
+    area: '1,180 sq.ft',
+    completedOn: 'Completed 2024',
+    budget: 'Mid-premium',
+    description: 'A modern apartment refresh with slim-profile furniture, custom drapery, warm wood details, and storage that keeps daily life looking intentionally composed.',
+    scope: ['Furniture layout', 'Window treatments', 'Custom tables', 'Decor sourcing', 'Site styling'],
+    rooms: ['Living room', 'Balcony', 'Study corner', 'Dining'],
+    palette: ['Slate blue', 'Oak', 'Charcoal metal', 'Soft white'],
+  },
+  {
+    category: 'Residential Interior',
+    location: 'Khar West, Mumbai',
+    area: '1,560 sq.ft',
+    completedOn: 'Completed 2025',
+    budget: 'Premium',
+    description: 'A bright urban retreat with layered seating, a composed entry view, curated artwork, and durable family-friendly materials across the public zones.',
+    scope: ['Living and dining', 'Entry console', 'Art selection', 'Loose furniture', 'Lighting upgrades'],
+    rooms: ['Foyer', 'Living room', 'Dining', 'TV lounge'],
+    palette: ['Aqua glass', 'Ivory', 'Ink blue', 'Natural linen'],
+  },
+  {
+    category: 'Residential Interior',
+    location: 'Juhu, Mumbai',
+    area: '1,850 sq.ft',
+    completedOn: 'Completed 2026',
+    budget: 'Luxury',
+    description: 'A warm minimal home with clean millwork, sculptural lighting, layered neutrals, and a relaxed material story suited to slow weekends and evening gatherings.',
+    scope: ['Full interior design', 'Millwork detailing', 'Lighting selection', 'Decor styling', 'Site supervision'],
+    rooms: ['Living room', 'Kitchen', 'Primary suite', 'Powder room'],
+    palette: ['Warm white', 'Tan leather', 'Ash wood', 'Black accents'],
+  },
+  {
+    category: 'Residential Interior',
+    location: 'Powai, Mumbai',
+    area: '1,700 sq.ft',
+    completedOn: 'Completed 2024',
+    budget: 'Premium',
+    description: 'A family home planned around a calm lounge, durable finishes, and practical circulation, with custom storage folded into the room architecture.',
+    scope: ['Family lounge', 'Bedroom refresh', 'Storage planning', 'Material selection', 'Final styling'],
+    rooms: ['Family lounge', 'Kids room', 'Primary bedroom', 'Den'],
+    palette: ['Deep navy', 'Grey fabric', 'Matte black', 'Smoked oak'],
+  },
+  {
+    category: 'Studio Apartment',
+    location: 'Lower Parel, Mumbai',
+    area: '540 sq.ft',
+    completedOn: 'Completed 2025',
+    budget: 'Compact premium',
+    description: 'A compact studio organized with multipurpose furniture, precise lighting, and visual quiet so one room can move easily between work, hosting, and rest.',
+    scope: ['Space planning', 'Multipurpose furniture', 'Lighting plan', 'Storage design', 'Decor sourcing'],
+    rooms: ['Studio living', 'Sleeping zone', 'Work nook', 'Entry'],
+    palette: ['Mist blue', 'White oak', 'Cool grey', 'Chrome'],
+  },
+]
+
+function getCollectionProjectImages(professional, collection, index) {
+  const collectionImages = (collection.items || [collection.item]).map((item) => item.image)
+  const workImages = getProfileWorkItems(professional).map((item) => item.image)
+  return [...collectionImages, ...workImages.slice(index), ...workImages]
+    .filter((image, imageIndex, images) => images.indexOf(image) === imageIndex)
+    .slice(0, 5)
+}
+
+function buildCollectionProject(professional, collection, index) {
+  const details = collectionProjectDetails[index % collectionProjectDetails.length]
+  const images = getCollectionProjectImages(professional, collection, index)
+
+  return {
+    ...details,
+    id: `project-${collection.id}`,
+    title: collection.title,
+    subtitle: `By ${professional.name}`,
+    images,
+    uploadedOn: 'Uploaded 2 weeks ago',
+  }
+}
+
+function WorkTopbar({ title, onBack, onAdd, addLabel = 'Add Work item', actions = null }) {
   return (
     <div className="border-b border-black/[0.04] bg-white">
       <header className="flex h-[57px] items-center justify-between px-4 py-2">
@@ -313,13 +405,13 @@ function WorkTopbar({ title, onBack, onAdd, addLabel = 'Add Work item' }) {
           <CaretLeft size={24} />
         </button>
         <h1 className="typo-section-title min-w-0 flex-1 truncate px-2 text-black">{title}</h1>
-        {onAdd ? (
+        {actions || (onAdd ? (
           <button type="button" onClick={onAdd} aria-label={addLabel} className="grid size-10 place-items-center rounded-full text-black">
             <Plus size={24} />
           </button>
         ) : (
           <span className="size-10 shrink-0" aria-hidden="true" />
-        )}
+        ))}
       </header>
     </div>
   )
@@ -355,11 +447,12 @@ function WorkTabs({ selectedTab, onSelectTab, isSelectionLocked = false }) {
   )
 }
 
-function WorkImageTile({ item, title, countLabel, isSelecting = false, selected = false, onSelect }) {
+function WorkImageTile({ item, title, countLabel, isSelecting = false, selected = false, onSelect, ariaLabel }) {
   return (
     <button
       type="button"
       onClick={() => onSelect?.(item)}
+      aria-label={ariaLabel}
       className="relative mb-3 w-full break-inside-avoid overflow-hidden rounded-[16px] bg-[#f2f2f2]"
       style={{ height: item.height }}
     >
@@ -410,28 +503,326 @@ function WorkAllGrid({ items, isSelecting, selectedIds, onToggleItem }) {
   )
 }
 
-function WorkCollectionsGrid({ professional, collections = [] }) {
+function WorkCollectionsGrid({ professional, collections = [], onOpenProject }) {
   const collectionTitles = ['Bandra Luxe 3BHK', 'Bandra Modern Haven', 'Urban Retreat 3BHK', 'Warm Minimal Home', 'Powai Family Home', 'Compact Studio']
-  const defaultCollections = getProfileWorkItems(professional).slice(0, 6).map((item, index) => ({
-    id: item.id,
-    item,
-    title: collectionTitles[index],
-    count: '1/5',
-  }))
+  const workItems = getProfileWorkItems(professional)
+  const defaultCollections = workItems.slice(0, 6).map((item, index) => {
+    const items = Array.from({ length: 5 }, (_, itemIndex) => workItems[(index + itemIndex) % workItems.length])
+
+    return {
+      id: `collection-${item.id}`,
+      item,
+      items,
+      title: collectionTitles[index],
+      count: `1/${items.length}`,
+    }
+  })
   const collectionItems = [...collections, ...defaultCollections]
 
   return (
     <div className="grid grid-cols-2 gap-x-3 gap-y-5 px-4 pb-6">
-      {collectionItems.map((collection, index) => (
-        <article key={collection.id} className="min-w-0">
-          <WorkImageTile
-            item={{ ...collection.item, height: index % 2 === 0 ? 178 : 148 }}
-            countLabel={collection.count}
-          />
-          <h2 className="typo-meta typo-weight-semibold -mt-1 truncate text-black">{collection.title}</h2>
-        </article>
-      ))}
+      {collectionItems.map((collection, index) => {
+        const openProject = () => onOpenProject?.(buildCollectionProject(professional, collection, index))
+
+        return (
+          <article key={collection.id} className="min-w-0">
+            <WorkImageTile
+              item={{ ...collection.item, height: 172 }}
+              countLabel={collection.count}
+              onSelect={openProject}
+              ariaLabel={`Open ${collection.title} project`}
+            />
+            <button type="button" onClick={openProject} className="typo-meta typo-weight-semibold -mt-1 block w-full truncate text-left text-black">
+              {collection.title}
+            </button>
+          </article>
+        )
+      })}
     </div>
+  )
+}
+
+function ProjectInfoTile({ label, value }) {
+  return (
+    <div className="rounded-[16px] border border-[#e0e0e0] bg-white p-3">
+      <p className="typo-caption uppercase text-[#7a7a7a]">{label}</p>
+      <p className="typo-body-strong mt-1 text-black">{value}</p>
+    </div>
+  )
+}
+
+const imageTagOptions = ['Living room', 'Bedroom', 'Kitchen', 'Bathroom', 'Dining', 'Furniture', 'Lighting', 'Storage', 'Minimal', 'Luxury']
+
+function getInitialImageTags(images = []) {
+  return images.reduce((tagsByImage, image, index) => ({
+    ...tagsByImage,
+    [image]: index === 0 ? ['Living room'] : [],
+  }), {})
+}
+
+function UploadedWorkProjectPage({ project, professional, onBack, isOwner = false }) {
+  const [editableProject, setEditableProject] = useState(project)
+  const [draftProject, setDraftProject] = useState(project)
+  const [imageTags, setImageTags] = useState(() => getInitialImageTags(project.images))
+  const [ownerPanel, setOwnerPanel] = useState(null)
+
+  useLayoutEffect(() => {
+    if (typeof window === 'undefined') return
+    window.scrollTo({ top: 0, left: 0 })
+  }, [project.id])
+
+  const updateDraftProject = (field, value) => {
+    setDraftProject((current) => ({
+      ...current,
+      [field]: value,
+    }))
+  }
+
+  const saveProjectEdits = () => {
+    setEditableProject(draftProject)
+    setOwnerPanel(null)
+  }
+
+  const closeOwnerPanel = () => {
+    setDraftProject(editableProject)
+    setOwnerPanel(null)
+  }
+
+  const openEditPanel = () => {
+    setDraftProject(editableProject)
+    setOwnerPanel('edit')
+  }
+
+  const toggleImageTag = (image, tag) => {
+    setImageTags((current) => {
+      const currentTags = current[image] || []
+      const nextTags = currentTags.includes(tag)
+        ? currentTags.filter((item) => item !== tag)
+        : [...currentTags, tag]
+
+      return {
+        ...current,
+        [image]: nextTags,
+      }
+    })
+  }
+
+  const projectView = editableProject
+
+  return (
+    <section className={`hynt-home-mobile-canvas relative mx-auto min-h-dvh w-full max-w-[390px] overflow-visible bg-white text-black ${isOwner ? 'pb-6' : 'pb-[112px]'}`}>
+      <div className="fixed left-1/2 top-0 z-50 w-full max-w-[390px] -translate-x-1/2 bg-white pt-[env(safe-area-inset-top)]">
+        <WorkTopbar
+          title="Project"
+          onBack={onBack}
+          actions={isOwner ? (
+            <button type="button" onClick={() => setOwnerPanel('menu')} aria-label="Project actions" className="grid size-10 place-items-center rounded-full text-black">
+              <DotsThreeVertical size={24} weight="bold" />
+            </button>
+          ) : null}
+        />
+      </div>
+      <div className="pt-[calc(57px+env(safe-area-inset-top))]">
+        <div className="no-scrollbar flex snap-x snap-mandatory overflow-x-auto">
+          {projectView.images.map((image, index) => (
+            <figure key={`${image}-${index}`} className="relative h-[312px] w-full shrink-0 snap-center overflow-hidden bg-[#f2f2f2]">
+              <img src={image} alt="" className="absolute inset-0 size-full object-cover" />
+              <span className="typo-meta absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-black backdrop-blur">
+                {index + 1}/{projectView.images.length}
+              </span>
+            </figure>
+          ))}
+        </div>
+
+        <section className="px-4 py-5">
+          <p className="typo-caption typo-weight-bold uppercase text-[#267449]">{projectView.category}</p>
+          <h1 className="typo-title-20-strong mt-1 text-black">{projectView.title}</h1>
+          <p className="typo-meta mt-2 flex items-center gap-1 text-[#686868]">
+            <MapPinSimpleArea size={16} />
+            {projectView.location}
+          </p>
+
+          <div className="mt-4 flex w-full items-center gap-3 rounded-[18px] border border-[#e0e0e0] bg-[#fbfbfb] p-3 text-left">
+            <img src={professional.avatar} alt={professional.name} className="size-12 shrink-0 rounded-[14px] object-cover" />
+            <span className="min-w-0 flex-1">
+              <span className="mt-0.5 flex min-w-0 items-center gap-1">
+                <span className="typo-body-strong truncate text-black">{professional.name}</span>
+                <SealCheck size={16} weight="fill" className="shrink-0 text-[#26C485]" />
+              </span>
+              <span className="typo-caption mt-0.5 flex items-center gap-1 text-[#686868]">
+                <Star size={13} weight="fill" className="text-[#F5B82E]" />
+                {professional.rating} | {professional.role}
+              </span>
+            </span>
+          </div>
+
+          <div className="mt-5 grid grid-cols-2 gap-2">
+            <ProjectInfoTile label="Area" value={projectView.area} />
+            <ProjectInfoTile label="Budget" value={projectView.budget} />
+            <ProjectInfoTile label="Timeline" value={projectView.completedOn} />
+            <ProjectInfoTile label="Images" value={`${projectView.images.length} photos`} />
+          </div>
+        </section>
+
+        <div className="h-px bg-[#e0e0e0]" />
+
+        <section className="px-4 py-5">
+          <h2 className="typo-title-16-strong text-black">About this project</h2>
+          <p className="typo-body mt-2 leading-[1.65] text-[#525252]">{projectView.description}</p>
+        </section>
+
+        <section className="px-4 pb-5">
+          <h2 className="typo-title-16-strong text-black">Scope covered</h2>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {projectView.scope.map((item) => (
+              <span key={item} className="typo-caption rounded-full border border-[#e0e0e0] bg-white px-3 py-2 text-[#525252]">
+                {item}
+              </span>
+            ))}
+          </div>
+        </section>
+
+        <section className="px-4 pb-5">
+          <h2 className="typo-title-16-strong text-black">Rooms shown</h2>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            {projectView.rooms.map((room) => (
+              <div key={room} className="rounded-[16px] border border-[#e0e0e0] bg-[#fbfbfb] p-3">
+                <p className="typo-body-strong text-black">{room}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="px-4 pb-6">
+          <h2 className="typo-title-16-strong text-black">Project gallery</h2>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            {projectView.images.map((image, index) => (
+              <button key={`${image}-gallery-${index}`} type="button" className={`relative overflow-hidden rounded-[16px] bg-[#f2f2f2] ${index === 0 ? 'col-span-2 h-[210px]' : 'h-[150px]'}`}>
+                <img src={image} alt="" className="absolute inset-0 size-full object-cover" loading="lazy" />
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section className="px-4 pb-6">
+          <h2 className="typo-title-16-strong text-black">Materials and palette</h2>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            {projectView.palette.map((item) => (
+              <div key={item} className="rounded-[16px] border border-[#e0e0e0] bg-[#fbfbfb] p-3">
+                <p className="typo-body-strong text-black">{item}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      {isOwner ? null : (
+        <div className="fixed bottom-0 left-1/2 z-40 w-full max-w-[390px] -translate-x-1/2 border-t border-[#e0e0e0] bg-white px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-3">
+          <button type="button" className="typo-body-strong flex h-12 w-full items-center justify-center gap-2 rounded-[16px] bg-black px-4 text-white">
+            <PaperPlaneTilt size={22} weight="fill" />
+            Send Inquiry
+          </button>
+        </div>
+      )}
+
+      {isOwner && ownerPanel ? (
+        <div className="fixed inset-0 z-[80] flex items-end justify-center bg-black/28">
+          <section className="w-full max-w-[390px] rounded-t-[24px] bg-white px-4 pb-[max(20px,env(safe-area-inset-bottom))] pt-4 shadow-[0_-18px_40px_rgba(0,0,0,0.16)]">
+            <div className="mb-4 flex items-center justify-between">
+              <div className="min-w-0">
+                <p className="typo-caption typo-weight-bold uppercase text-[#267449]">Collection tools</p>
+                <h2 className="typo-title-16-strong mt-1 truncate text-black">
+                  {ownerPanel === 'edit' ? 'Edit collection' : ownerPanel === 'tags' ? 'Tag images' : projectView.title}
+                </h2>
+              </div>
+              <button type="button" onClick={closeOwnerPanel} aria-label="Close collection tools" className="grid size-9 place-items-center rounded-full bg-[#f3f3f3] text-black">
+                <X size={18} weight="bold" />
+              </button>
+            </div>
+
+            {ownerPanel === 'menu' ? (
+              <div className="space-y-2">
+                <button type="button" onClick={openEditPanel} className="flex h-12 w-full items-center gap-3 rounded-[16px] border border-[#e0e0e0] bg-white px-3 text-left">
+                  <PencilSimpleLine size={20} />
+                  <span className="typo-body-strong text-black">Edit collection</span>
+                </button>
+                <button type="button" onClick={() => setOwnerPanel('tags')} className="flex h-12 w-full items-center gap-3 rounded-[16px] border border-[#e0e0e0] bg-white px-3 text-left">
+                  <Tag size={20} />
+                  <span className="typo-body-strong text-black">Add image tags</span>
+                </button>
+              </div>
+            ) : null}
+
+            {ownerPanel === 'edit' ? (
+              <div className="space-y-3">
+                {[
+                  ['title', 'Collection name'],
+                  ['category', 'Category'],
+                  ['location', 'Location'],
+                  ['area', 'Area'],
+                ].map(([field, label]) => (
+                  <label key={field} className="block">
+                    <span className="typo-caption text-[#686868]">{label}</span>
+                    <input
+                      type="text"
+                      value={draftProject[field]}
+                      onChange={(event) => updateDraftProject(field, event.target.value)}
+                      className="typo-body mt-1 h-11 w-full rounded-[12px] border border-[#d9d9d9] bg-white px-3 text-black outline-none focus:border-[#26c485]"
+                    />
+                  </label>
+                ))}
+                <label className="block">
+                  <span className="typo-caption text-[#686868]">Project note</span>
+                  <textarea
+                    value={draftProject.description}
+                    onChange={(event) => updateDraftProject('description', event.target.value)}
+                    className="typo-body mt-1 min-h-24 w-full resize-none rounded-[12px] border border-[#d9d9d9] bg-white px-3 py-2 text-black outline-none focus:border-[#26c485]"
+                  />
+                </label>
+                <button type="button" onClick={saveProjectEdits} className="typo-body-strong flex h-12 w-full items-center justify-center gap-2 rounded-[16px] bg-black px-4 text-white">
+                  <CheckCircle size={20} weight="fill" />
+                  Save changes
+                </button>
+              </div>
+            ) : null}
+
+            {ownerPanel === 'tags' ? (
+              <div className="max-h-[66dvh] overflow-y-auto pr-1">
+                <div className="space-y-4">
+                  {projectView.images.map((image, index) => (
+                    <article key={`${image}-tags`} className="border-b border-[#e0e0e0] pb-4 last:border-b-0">
+                      <div className="flex gap-3">
+                        <img src={image} alt="" className="h-20 w-20 shrink-0 rounded-[14px] object-cover" />
+                        <div className="min-w-0 flex-1">
+                          <p className="typo-body-strong text-black">Image {index + 1}</p>
+                          <p className="typo-caption mt-1 text-[#686868]">Tags help HYNT place this image in discovery surfaces later.</p>
+                        </div>
+                      </div>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {imageTagOptions.map((tag) => {
+                          const selected = (imageTags[image] || []).includes(tag)
+
+                          return (
+                            <button
+                              key={tag}
+                              type="button"
+                              onClick={() => toggleImageTag(image, tag)}
+                              className={`typo-caption rounded-full border px-3 py-2 ${selected ? 'border-[#26c485] bg-[#26c485] text-white' : 'border-[#e0e0e0] bg-white text-[#525252]'}`}
+                            >
+                              {tag}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </section>
+        </div>
+      ) : null}
+    </section>
   )
 }
 
@@ -457,12 +848,13 @@ function WorkProductsGrid() {
   )
 }
 
-function ProfileWorkPage({ professional, initialTab = 'all', onBack }) {
+function ProfileWorkPage({ professional, initialTab = 'all', onBack, isOwner = false }) {
   const [selectedTab, setSelectedTab] = useState(initialTab)
   const [isCreatingCollection, setIsCreatingCollection] = useState(false)
   const [selectedWorkIds, setSelectedWorkIds] = useState([])
   const [collectionName, setCollectionName] = useState('')
   const [createdCollections, setCreatedCollections] = useState([])
+  const [selectedProject, setSelectedProject] = useState(null)
   const workItems = getProfileWorkItems(professional)
   const selectedItems = workItems.filter((item) => selectedWorkIds.includes(item.id))
 
@@ -500,13 +892,25 @@ function ProfileWorkPage({ professional, initialTab = 'all', onBack }) {
       {
         id: `created-${Date.now()}`,
         item: firstItem,
+        items: selectedItems,
         title,
-        count: `${selectedItems.length}/5`,
+        count: `1/${Math.min(selectedItems.length, 5)}`,
       },
       ...current,
     ])
     setSelectedTab('collections')
     cancelCollectionFlow()
+  }
+
+  if (selectedProject) {
+    return (
+      <UploadedWorkProjectPage
+        project={selectedProject}
+        professional={professional}
+        onBack={() => setSelectedProject(null)}
+        isOwner={isOwner}
+      />
+    )
   }
 
   return (
@@ -515,7 +919,7 @@ function ProfileWorkPage({ professional, initialTab = 'all', onBack }) {
         <WorkTopbar
           title={isCreatingCollection ? 'New collection' : 'Work'}
           onBack={isCreatingCollection ? cancelCollectionFlow : onBack}
-          onAdd={isCreatingCollection ? undefined : startCollectionFlow}
+          onAdd={!isCreatingCollection && isOwner ? startCollectionFlow : undefined}
         />
         <WorkTabs
           selectedTab={selectedTab}
@@ -538,7 +942,13 @@ function ProfileWorkPage({ professional, initialTab = 'all', onBack }) {
             onToggleItem={toggleSelectedWorkItem}
           />
         ) : null}
-        {selectedTab === 'collections' ? <WorkCollectionsGrid professional={professional} collections={createdCollections} /> : null}
+        {selectedTab === 'collections' ? (
+          <WorkCollectionsGrid
+            professional={professional}
+            collections={createdCollections}
+            onOpenProject={setSelectedProject}
+          />
+        ) : null}
         {selectedTab === 'products' ? <WorkProductsGrid /> : null}
         {selectedTab === 'catalogue' ? <WorkProductsGrid /> : null}
       </div>
@@ -859,6 +1269,7 @@ export function ProfessionalProfilePage({ professional, onBack, audience = 'home
         professional={professional}
         initialTab={workInitialTab}
         onBack={() => setWorkInitialTab(null)}
+        isOwner={isProfessionalOwner}
       />
     )
   }
